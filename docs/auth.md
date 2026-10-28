@@ -60,6 +60,16 @@ terraform {
 }
 ```
 
+### Using another claim as project
+
+By default the `terraform-backend` claim is used. For identity providers which cannot emit that claim, such as the OIDC ID tokens of GitHub Actions or Forgejo Actions, the project can instead be read from an existing top-level claim:
+
+| Environment Variable   | Type   | Example         | Description                                                                                                                                                                                              |
+|------------------------|--------|-----------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| AUTH_JWT_PROJECT_CLAIM | string | `repository_id` | Name of a token claim whose string value must equal the `project` of the requested state. If defined, it replaces the `terraform-backend` claim (tokens with only that claim are rejected) and grants access to all states of the project. |
+
+Tokens without the claim, or with a non-string or empty value, are rejected. The claim must be a unique and stable identifier which is controlled by the identity provider and not by the token requester (e.g. `repository_id`, not `sub` or a user-chosen value). As `project` is a single URL path segment, claims containing `/` (e.g. `owner/repo`) can never match.
+
 ### Example using HashiCorp Vault Identity Tokens
 
 HashiCorp Vault allows creating [Identity Tokens](https://www.vaultproject.io/docs/secrets/identity/identity-token) for third party systems, so that Vault policies can be used to give access to specific Terraform states.
